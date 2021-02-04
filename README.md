@@ -1,0 +1,1 @@
+# azurerm-sql-managed-instance
