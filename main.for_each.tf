@@ -23,15 +23,15 @@ variable budgets {
 // Issue as tracked at https://github.com/terraform-providers/terraform-provider-azurerm/pull/9201
 // As workaround we will use ARM template deployment from Terraform
 
-data "local_file" "arm" {
-  filename = "arm.json"
+data "local_file" "arm_template" {
+  filename = "sql-managed-instance.json"
 }
 
 resource "azurerm_subscription_template_deployment" "budgets" {
   for_each           = var.budgets
   name               = each.key
   location           = "westeurope"
-  template_content   = data.local_file.arm.content
+  template_content   = data.local_file.arm_template.content
   parameters_content = <<PARAMETERS
      {
         "budgetName": {
