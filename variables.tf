@@ -9,11 +9,6 @@ variable "names" {
   type        = map(string)
 }
 
-#variable "tags" {
-#  description = "tags to be applied to resources"
-#  type        = map(string)
-#}
-
 variable "location" {
   description = "Specifies the supported Azure location to MySQL server resource"
   type        = string
