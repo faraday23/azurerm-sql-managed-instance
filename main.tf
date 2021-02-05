@@ -21,53 +21,56 @@ data "local_file" "arm_template" {
 }
 
 resource "azurerm_resource_group_template_deployment" "sql_mi" {
-  name                = "${var.names.product_name}-${var.names.service_name}"
+  name                = "${var.names.product_name}-${var.names.service_name}-${random_string.mi_name.result}"
   resource_group_name = var.resource_group_name
   deployment_mode     = var.deployment_mode
   template_content    = data.local_file.arm_template.content
   parameters_content  = <<PARAMETERS
      {
         "managedInstanceName": {
-            "value": "${var.names.product_name}-${var.names.service_name}"
+            "value": "${each.key}"
         },
         "location": {
-            "value": "eastus2"
+            "value": "${var.location}"
         },
         "skuName": {
-            "value": "Standard_F2"
+            "value": "${each.value.skuName}"
         },
         "storageSizeInGB": {
-            "value": "256"
+            "value": "${each.value.storageSizeInGB}"
         },
         "vCores": {
-            "value": "8"
+            "value": "${each.value.vCores}"
         },
         "licenseType": {
-            "value": "LicenseIncluded"
+            "value": "${each.value.licenseType}"
         },
         "collation": {
-            "value": "SQL_Latin1_General_CP1_CI_AS"
+            "value": "${each.value.collation}"
         },
         "timezoneId": {
-            "value": "UTC"
+            "value": "${each.value.timezoneId}"
+        },
+        "collation": {
+            "value": "${each.value.collation}"
         },
         "proxyOverride": {
-            "value": "Proxy"
+            "value": "${each.value.proxyOverride}"
         },
         "publicDataEndpointEnabled": {
-            "value": false
+            "value": "${each.value.publicDataEndpointEnabled}"
         },
         "administratorLogin": {
-            "value": "azadmin"
+            "value": "azadmin-${random_string.mi_name.result}"
         },
         "administratorLoginPassword": {
             "value": "${random_password.admin.result}"
         },
         "managedInstanceTags": {
-            "value": "${var.names.product_name}-${var.names.service_name}"
+            "value": "${var.names.product_name}-${var.names.service_name}-${random_string.mi_name.result}"
         },
         "storageAccountType": {
-            "value": "GRS"
+            "value": "${each.value.storageAccountType}"
         },
         "virtualNetworkName": {
             "value": "${var.virtual_network_name}"
