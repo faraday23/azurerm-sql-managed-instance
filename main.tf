@@ -1,6 +1,6 @@
 // Terraform currently does not support creating azure managed instance nativelly
 // Issue as tracked at https://github.com/terraform-providers/terraform-provider-azurerm/issues/1747
-// As workaround we will use ARM template deployment from Terraform
+// As workaround we can use ARM template deployment from Terraform
 
 # creates random password for admin account 
 resource "random_password" "admin" {
