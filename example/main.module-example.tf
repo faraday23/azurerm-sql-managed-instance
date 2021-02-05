@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 2.25.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 2.2.0"
+    }
   }
 }
 
@@ -14,9 +18,20 @@ provider "azurerm" {
   features {}
 }
 
+resource "random_string" "vm_name" {
+  length  = 4
+  special = false
+  upper   = false
+  number  = false
+}
+
+data "http" "my_ip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
 module "subscription" {
   source          = "github.com/Azure-Terraform/terraform-azurerm-subscription-data.git?ref=v1.0.0"
-  subscription_id = "000000-0000-0000-0000-0000000"
+  subscription_id = "00000000-0000-0000-000000"
 }
 
 module "rules" {
@@ -33,7 +48,7 @@ module "metadata" {
   location            = "eastus2"
   sre_team            = "iog-core-services"
   environment         = "sandbox"
-  product_name        = "oraclevm"
+  product_name        = "azuremi"
   business_unit       = "iog"
   product_group       = "core"
   service_name        = "webesp"
@@ -72,13 +87,16 @@ module "virtual_network" {
   }
 }
 
-# azurerm_sql_managed_instance see for more info - https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/sql-managed-instance-paas-overview
+# azurerm_sql_managed_instance see for more info https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/sql-managed-instance-paas-overview
 module "sql_mi" {
   source = "github.com/faraday23/azurerm-sql-managed-instance.git"
 
   resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
   names               = module.metadata.names
-  tags                = module.metadata.tags
+
+  deployment_mode      = "Complete"
+  virtual_network_name = module.virtual_network.subnet_nsg_names["iaas-outbound"]
 }
 
 # output from arm template
