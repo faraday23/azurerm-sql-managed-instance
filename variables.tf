@@ -20,48 +20,63 @@ variable "deployment_mode" {
   default     = "Complete"
 }
 
-variable "virtual_network_name" {
-  type = any
+variable "sql_mi_settings" {
+  type        = any
+  description = "these values are declared on the module call"
 }
 
-variable sql_mi_defaults {
+variable "sql_mi_defaults" {
   type = any
   default = {
-    managedInstanceName        = "randomcomputername"
-    location                   = "eastus2"
-    skuName                    = "Standard_F2"
-    storageSizeInGB            = 256
-    vCores                     = 8
-    licenseType                = "LicenseIncluded"
-    collation                  = "SQL_Latin1_General_CP1_CI_AS"
-    timezoneId                 = "UTC"
-    proxyOverride              = "Proxy"
-    publicDataEndpointEnabled  = false
-    minimalTlsVersion          = "1.2"
-    administratorLogin         = "azadmin"
-    administratorLoginPassword = ""
-    managedInstanceTags        = ""
-    storageAccountType         = "GRS"
-
+    sqlManagedInstanceName            = ""
+    location                          = ""
+    sqlManagedInstanceSkuName         = "GP_Gen5"
+    sqlManagedInstanceStorageSizeInGB = "32"
+    sqlManagedInstancevCores          = "8"
+    sqlManagedInstanceLicenseType     = "LicenseIncluded"
+    sqlManagedInstanceSkuEdition      = "GeneralPurpose"
+    sqlManagedInstanceHardwareFamily  = "Gen5"
+    sqlManagedInstanceCollation       = "SQL_Latin1_General_CP1_CI_AS"
+    sqlManagedInstanceAdminLogin      = "azadmin"
+    sqlManagedInstancePassword        = ""
+    tags                              = {}
+    "_artifactsLocation"              = "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/azure-sql-managed-instance/"
+    "_artifactsLocationSasToken"      = ""
+    vnetResourceName                  = "virtualNetwork"
+    vnetAddressRange                  = "10.0.0.0/16"
+    managedInstanceSubnetName         = "mi-subnet"
+    managedInstanceNSGName            = "mi-NSG"
+    managedInstanceRouteTableName     = "mi-RouteTable"
+    managedInstanceSubnetAddressRange = "10.0.0.0/24"
+    miManagementIps                   = []
   }
   description = <<EOT
 azure sql managed instance settings (only applied to virtual machine settings managed within this module)
-    managedInstanceName             = (Required) The name of the Managed Instance.
-    location                        = (Required) The location of the Managed Instance
-    skuName                         = (Required) Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated."
-    storageSizeInGB                 = (Required) Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only.
-    vCores                          = (Required) The number of vCores.
-    licenseType                     = (Optional) Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses.
-    collation                       = (Optional) Specifies the priority of this Virtual Machine. Possible values are Regular and Spot. Defaults to Regular. Changing this forces a new resource to be created.
-    timezoneId                      = (Optional) Specifies what should happen when the Virtual Machine is evicted for price reasons when using a Spot instance. At this time the only supported value is Deallocate. Changing this forces a new resource to be created. This can only be configured when priority is set to Spot.
-    proxyOverride                   = (Optional) Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput.
-    publicDataEndpointEnabled       = (Optional) Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode.
-    administratorLogin              = (Required) The login of the Managed Instance admin.
-    administratorLoginPassword      = (Required) The password of the Managed Instance admin.
-    managedInstanceTags             = (Optional) Resource tags to associate with the instance.
-    storageAccountType              = (Required) Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'.
-    virtualNetworkName              = (Required) The virtual network name. Leave empty for the default value.
-    virtualNetworkResourceGroupName = (Required) The resource group where the networking resources will be created or updated. Default is the same resource group as Managed Instance.
+    managedInstanceName                = (Required) The name of the Managed Instance.
+    location                           = (Required) The location of the Managed Instance
+    skuName                            = (Required) Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated. allowedValues: GP_Gen4, GP_Gen5, BC_Gen4, BC_Gen5"
+    skuEdition                         = (Optional) SKU Edition for the Managed Instance. In case skuName is set this parameter is ignored.
+    storageSizeInGB                    = (Required) Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. minimumValue: 32.
+    vCores                             = (Required) The number of vCores. allowedValues: 4, 8, 16, 24, 32, 40, 64, 80
+    dnsZonePartner                     = (Optional) The resource id of another Managed Instance whose DNS zone this Managed Instance will share after creation.
+    licenseType                        = (Optional) Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses.
+    collation                          = (Optional) Specifies the priority of this Virtual Machine. Possible values are Regular and Spot. Defaults to Regular. Changing this forces a new resource to be created.
+    timezoneId                         = (Optional) Specifies what should happen when the Virtual Machine is evicted for price reasons when using a Spot instance. At this time the only supported value is Deallocate. Changing this forces a new resource to be created. This can only be configured when priority is set to Spot.
+    proxyOverride                      = (Optional) Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput. allowedValues: Proxy, Redirect.
+    publicDataEndpointEnabled          = (Optional) Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode.
+    nsgForPublicEndpoint               = (Optional) Determines whether which NSG inbound traffic rule to add for the public endpoint. In case publicDataEndpointEnabled is false this parameter is ignored. allowedValues: "", allowFromInternetTo3342NSG, allowFromAzureCloudTo3342NSG, disallowTrafficTo3342NSG.
+    minimalTlsVersion                  = (Required) The minimum TLS version enforced by the Managed Instance for inbound connections. allowedValues: 1.0, 1.1, 1.2"
+    administratorLogin                 = (Required) The login of the Managed Instance admin.
+    administratorLoginPassword         = (Required) The password of the Managed Instance admin.
+    managedInstanceTags                = (Optional) Resource tags to associate with the instance. example: { "<tag-name1>": "<tag-value1>", "<tag-name2>": "<tag-value2>" },
+    storageAccountType                 = (Required) Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'. allowedValues: GRS, ZRS, LRS"
+    virtualNetworkName                 = (Required) The virtual network name. Leave empty for the default value.
+    virtualNetworkResourceGroupName    = (Required) The resource group where the networking resources will be created or updated. Default is the same resource group as Managed Instance.
+    defaultVirtualNetworkAddressPrefix = (Optional) The default virtual network address is "10.0.0.0/16"
+    defaultSubnetAddressPrefix         = (Optional) The default subnet address is "10.0.0.0/24"
+    deployInExistingSubnet             = (Optional) Determines whether the Managed Instance will be deployed in an existing subnet. Subnet parameters need to be valid if this is set.
+    subnetName                         = (Optional) The subnet name. Leave empty for the default value. defaultValue: "ManagedInstance"
 
 EOT 
 }
+
