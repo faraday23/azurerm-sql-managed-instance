@@ -46,21 +46,31 @@
          "type":"string",
          "defaultValue":"256",
          "metadata":{
-            "description":"Amount of Storage in GB for this instance"
+            "description":"Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. Minimum value is 32 GB"
          }
       },
       "sqlManagedInstancevCores":{
          "type":"string",
          "defaultValue":"8",
+         "allowedValues":[
+            "4",
+            "8",
+            "16",
+            "24",
+            "32",
+            "40",
+            "64",
+            "80"
+         ],
          "metadata":{
-            "description":"Number of vCores for this instance"
+            "description":"The number of vCores."
          }
       },
       "sqlManagedInstanceLicenseType":{
          "type":"string",
          "defaultValue":"BasePrice",
          "metadata":{
-            "description":"Type of license: BasePrice (BYOL) or LicenceIncluded"
+            "description":"Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses."
          },
          "allowedValues":[
             "BasePrice",
@@ -71,7 +81,7 @@
          "type":"string",
          "defaultValue":"GP_Gen5",
          "metadata":{
-            "description":"SKU NAME (GP_Gen4, GP_Gen5, BC_GEN5)"
+            "description":"Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated."
          },
          "allowedValues":[
             "GP_Gen4",
@@ -84,7 +94,7 @@
          "type":"string",
          "defaultValue":"GeneralPurpose",
          "metadata":{
-            "description":"SKU Edition (GeneralPurpose, BusinessCritical) "
+            "description":"SKU Edition for the Managed Instance. In case skuName is set this parameter is ignored."
          },
          "allowedValues":[
             "GeneralPurpose",
@@ -95,7 +105,7 @@
          "type":"string",
          "defaultValue":"Gen5",
          "metadata":{
-            "description":"Hardware family (Gen4, Gen5)"
+            "description":"Compute generation for the instance. In case skuName is set this parameter is ignored."
          },
          "allowedValues":[
             "Gen4",
@@ -109,10 +119,85 @@
             "description":"SQL Collation"
          }
       },
+      "backupShortTermRetentionPolicies":{
+         "type":"string",
+         "defaultValue":"7",
+         "metadata":{
+            "description":"SQL managed instances are backed up automatically. Backup availability is listed below for each database on this managed instance. Manage your available long-term retention (LTR) backups here. available values: retentionDays: 7-35"
+         }
+      },
+      "azureAdAdmin":{
+         "type":"string",
+         "metadata":{
+            "description":"The active directory admin or group name that will be assigned to the SQL Managed Instance"
+         }
+      },
+      "proxyOverride":{
+         "type":"string",
+         "defaultValue":"Proxy",
+         "allowedValues":[
+            "Proxy",
+            "Redirect"
+         ],
+         "metadata":{
+            "description":"Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+         }
+      },
+      "publicDataEndpointEnabled":{
+         "type":"string",
+         "defaultValue":"false",
+         "metadata":{
+            "description":"Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+         }
+      },
+      "minimalTlsVersion":{
+         "type":"string",
+         "defaultValue":"1.2",
+         "allowedValues":[
+            "1.0",
+            "1.1",
+            "1.2"
+         ],
+         "metadata":{
+            "description":"The minimum TLS version enforced by the Managed Instance for inbound connections."
+         }
+      },
+      "storageAccountType":{
+         "type":"string",
+         "defaultValue":"GRS",
+         "allowedValues":[
+            "GRS",
+            "ZRS",
+            "LRS"
+         ],
+         "metadata":{
+            "description":"Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'."
+         }
+      },
+      "zoneRedundant":{
+         "type":"string",
+         "defaultValue":"false",
+         "metadata":{
+            "description":"Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+         }
+      }, 
+      "maintenanceConfigurationId":{
+         "type":"string",
+         "defaultValue":"",
+         "metadata":{
+            "description":"Maintenance window ID. Please note that during a maintenance event, databases are fully available and accessible but some of the maintenance updates require a failover as Azure takes databases offline for a short time to apply the maintenance updates. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/database/maintenance-window"
+         }
+      }, 
+      "timezoneId":{
+         "type":"string",
+         "defaultValue":"Eastern Standard Time",
+         "metadata":{
+            "description":"Id of the timezone. Allowed values are timezones supported by Windows."
+         }
+      },
       "tags":{
          "type":"object",
          "defaultValue":{
-            
          },
          "metadata":{
             "description":"Tags for the Managed Instance SQL resource."
@@ -373,7 +458,7 @@
                   "value":"[parameters('managedInstanceRouteTableName')]"
                },
                "miManagementIps":{
-                  "value":"[parameters('miManagementIps')]"
+                  "value":"[parameters('miManagemfentIps')]"
                }
             }
          }
@@ -403,7 +488,30 @@
             "licenseType":"[parameters('sqlManagedInstancelicenseType')]",
             "hardwareFamily":"[parameters('sqlManagedInstanceHardwareFamily')]",
             "collation":"[parameters('sqlManagedInstanceCollation')]",
-            "publicDataEndpointEnabled":"false"
+            "proxyOverride":"[parameters('proxyOverride')]",
+            "publicDataEndpointEnabled":"[parameters('publicDataEndpointEnabled')]",
+            "minimalTlsVersion":"[parameters('minimalTlsVersion')]",
+            "backupShortTermRetentionPolicies":"[parameters('backupShortTermRetentionPolicies')]",
+            "azureAdAdmin":"[parameters('azureAdAdmin')]",
+            "maintenanceConfigurationId":"[parameters('maintenanceConfigurationId')]",
+            "storageAccountType":"[parameters('storageAccountType')]",
+            "zoneRedundant":"[parameters('zoneRedundant')]",
+            "timezoneId":"[parameters('timezoneId')]"
+         } 
+      }, 
+      {
+         "type":"Microsoft.Sql/managedInstances/administrators",
+         "apiVersion":"2019-06-01-preview",
+         "name":"[concat(parameters('sqlManagedInstanceName'), '/ActiveDirectory')]",
+         "condition":"[not(empty(parameters('azureAdAdmin')))]",
+         "dependsOn":[
+            "[resourceId('Microsoft.Sql/managedInstances', parameters('sqlManagedInstanceName'))]"
+         ],
+         "properties":{
+            "administratorType":"ActiveDirectory",
+            "login":"[parameters('azureAdAdmin').login]",
+            "sid":"[parameters('azureAdAdmin').sid]",
+            "tenantId":"[parameters('azureAdAdmin').tenantId]"
          }
       }
    ]
