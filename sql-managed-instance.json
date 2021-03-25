@@ -1,58 +1,60 @@
 {
-   "$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-   "contentVersion":"1.0.0.0",
-   "parameters":{
-      "location":{
-         "type":"string",
-         "defaultValue":"[resourceGroup().location]",
-         "metadata":{
-            "description":"Location for all resources"
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "location": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().location]",
+         "metadata": {
+            "description": "Location for all resources"
          }
       },
-      "vnetResourceName":{
-         "type":"string",
-         "defaultValue":"virtualNetwork",
-         "metadata":{
-            "description":"The name of the vnet"
+      "vnetResourceName": {
+         "type": "string",
+         "defaultValue": "virtualNetwork",
+         "metadata": {
+            "description": "The name of the vnet"
          }
       },
-      "managedInstanceSubnetName":{
-         "type":"string",
-         "defaultValue":"mi-subnet",
-         "metadata":{
-            "description":"Managed Instance Subnet name"
+      "managedInstanceSubnetName": {
+         "type": "string",
+         "defaultValue": "mi-subnet",
+         "metadata": {
+            "description": "Managed Instance Subnet name"
          }
       },
-      "sqlManagedInstanceName":{
-         "type":"string",
-         "defaultValue":"[concat('managedInstance-', uniqueString(resourceGroup().id))]",
-         "metadata":{
-            "description":"Name of the Azure SQL Managed Instance - must be globally unique, contain only lowercase letters, numbers and '-'"
+      "sqlManagedInstanceName": {
+         "type": "string",
+         "defaultValue": "[concat('managedInstance-', uniqueString(resourceGroup().id))]",
+         "metadata": {
+            "description": "Name of the Azure SQL Managed Instance - must be globally unique, contain only lowercase letters, numbers and '-'"
          }
       },
-      "sqlManagedInstanceAdminLogin":{
-         "type":"string",
-         "metadata":{
-            "description":"Admin user for Managed Instance"
+      "sqlManagedInstanceAdminLogin": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Admin user for Managed Instance"
          }
       },
-      "sqlManagedInstancePassword":{
-         "type":"securestring",
-         "metadata":{
-            "description":"Admin user password - must be 16-128 characters, must contain 3 of uppercase, lowercase, numbers and non-alphanumeric characters, and cannot contain all or part of the login name"
+      "sqlManagedInstancePassword": {
+         "type": "securestring",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Admin user password - must be 16-128 characters, must contain 3 of uppercase, lowercase, numbers and non-alphanumeric characters, and cannot contain all or part of the login name"
          }
       },
-      "sqlManagedInstanceStorageSizeInGB":{
-         "type":"string",
-         "defaultValue":"256",
-         "metadata":{
-            "description":"Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. Minimum value is 32 GB"
+      "sqlManagedInstanceStorageSizeInGB": {
+         "type": "string",
+         "defaultValue": "256",
+         "metadata": {
+            "description": "Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. Minimum value is 32 GB"
          }
       },
-      "sqlManagedInstancevCores":{
-         "type":"string",
-         "defaultValue":"8",
-         "allowedValues":[
+      "sqlManagedInstancevCores": {
+         "type": "string",
+         "defaultValue": "8",
+         "allowedValues": [
             "4",
             "8",
             "16",
@@ -62,185 +64,194 @@
             "64",
             "80"
          ],
-         "metadata":{
-            "description":"The number of vCores."
+         "metadata": {
+            "description": "The number of vCores."
          }
       },
-      "sqlManagedInstanceLicenseType":{
-         "type":"string",
-         "defaultValue":"BasePrice",
-         "metadata":{
-            "description":"Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses."
+      "sqlManagedInstanceLicenseType": {
+         "type": "string",
+         "defaultValue": "BasePrice",
+         "metadata": {
+            "description": "Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses."
          },
-         "allowedValues":[
+         "allowedValues": [
             "BasePrice",
             "LicenseIncluded"
          ]
       },
-      "sqlManagedInstanceSkuName":{
-         "type":"string",
-         "defaultValue":"GP_Gen5",
-         "metadata":{
-            "description":"Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated."
+      "sqlManagedInstanceSkuName": {
+         "type": "string",
+         "defaultValue": "GP_Gen5",
+         "metadata": {
+            "description": "Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated."
          },
-         "allowedValues":[
+         "allowedValues": [
             "GP_Gen4",
             "GP_Gen5",
             "BC_Gen4",
             "BC_Gen5"
          ]
       },
-      "sqlManagedInstanceskuEdition":{
-         "type":"string",
-         "defaultValue":"GeneralPurpose",
-         "metadata":{
-            "description":"SKU Edition for the Managed Instance. In case skuName is set this parameter is ignored."
+      "sqlManagedInstanceskuEdition": {
+         "type": "string",
+         "defaultValue": "GeneralPurpose",
+         "metadata": {
+            "description": "SKU Edition for the Managed Instance. In case skuName is set this parameter is ignored."
          },
-         "allowedValues":[
+         "allowedValues": [
             "GeneralPurpose",
             "BusinessCritical"
          ]
       },
-      "sqlManagedInstanceHardwareFamily":{
-         "type":"string",
-         "defaultValue":"Gen5",
-         "metadata":{
-            "description":"Compute generation for the instance. In case skuName is set this parameter is ignored."
+      "sqlManagedInstanceHardwareFamily": {
+         "type": "string",
+         "defaultValue": "Gen5",
+         "metadata": {
+            "description": "Compute generation for the instance. In case skuName is set this parameter is ignored."
          },
-         "allowedValues":[
+         "allowedValues": [
             "Gen4",
             "Gen5"
          ]
       },
-      "sqlManagedInstanceCollation":{
-         "type":"string",
-         "defaultValue":"SQL_Latin1_General_CP1_CI_AS",
-         "metadata":{
-            "description":"SQL Collation"
+      "sqlManagedInstanceCollation": {
+         "type": "string",
+         "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+         "metadata": {
+            "description": "SQL Collation"
          }
       },
-      "backupShortTermRetentionPolicies":{
-         "type":"string",
-         "defaultValue":"7",
-         "metadata":{
-            "description":"SQL managed instances are backed up automatically. Backup availability is listed below for each database on this managed instance. Manage your available long-term retention (LTR) backups here. available values: retentionDays: 7-35"
+      "backupShortTermRetentionPolicies": {
+         "type": "string",
+         "defaultValue": "7",
+         "metadata": {
+            "description": "SQL managed instances are backed up automatically. Backup availability is listed below for each database on this managed instance. Manage your available long-term retention (LTR) backups here. available values: retentionDays: 7-35"
          }
       },
-      "azureAdAdmin":{
-         "type":"string",
-         "metadata":{
-            "description":"The active directory admin or group name that will be assigned to the SQL Managed Instance"
+      "azureAdAdmin": {
+         "type": "string",
+         "defaultValue": "azadmin",
+         "metadata": {
+            "description": "The active directory admin or group name that will be assigned to the SQL Managed Instance"
          }
       },
-      "proxyOverride":{
-         "type":"string",
-         "defaultValue":"Proxy",
-         "allowedValues":[
+      "proxyOverride": {
+         "type": "string",
+         "defaultValue": "Proxy",
+         "allowedValues": [
             "Proxy",
             "Redirect"
          ],
-         "metadata":{
-            "description":"Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+         "metadata": {
+            "description": "Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
          }
       },
-      "publicDataEndpointEnabled":{
-         "type":"string",
-         "defaultValue":"false",
-         "metadata":{
-            "description":"Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+      "publicDataEndpointEnabled": {
+         "type": "string",
+         "defaultValue": "false",
+         "metadata": {
+            "description": "Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
          }
       },
-      "minimalTlsVersion":{
-         "type":"string",
-         "defaultValue":"1.2",
-         "allowedValues":[
+      "minimalTlsVersion": {
+         "type": "string",
+         "defaultValue": "1.2",
+         "allowedValues": [
             "1.0",
             "1.1",
             "1.2"
          ],
-         "metadata":{
-            "description":"The minimum TLS version enforced by the Managed Instance for inbound connections."
+         "metadata": {
+            "description": "The minimum TLS version enforced by the Managed Instance for inbound connections."
          }
       },
-      "storageAccountType":{
-         "type":"string",
-         "defaultValue":"GRS",
-         "allowedValues":[
+      "storageAccountType": {
+         "type": "string",
+         "defaultValue": "GRS",
+         "allowedValues": [
             "GRS",
             "ZRS",
             "LRS"
          ],
-         "metadata":{
-            "description":"Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'. Gets or sets the storage account type used to store backups for this instance. The options are LRS (LocallyRedundantStorage), ZRS (ZoneRedundantStorage) and GRS (GeoRedundantStorage). Possible values include: 'GRS', 'LRS', 'ZRS'"
+         "metadata": {
+            "description": "Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'. Gets or sets the storage account type used to store backups for this instance. The options are LRS (LocallyRedundantStorage), ZRS (ZoneRedundantStorage) and GRS (GeoRedundantStorage). Possible values include: 'GRS', 'LRS', 'ZRS'"
          }
       },
-      "zoneRedundant":{
-         "type":"string",
-         "defaultValue":"false",
-         "metadata":{
-            "description":"Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
+      "zoneRedundant": {
+         "type": "string",
+         "defaultValue": "false",
+         "metadata": {
+            "description": "Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/public-endpoint-overview"
          }
       },
-      "maintenanceConfigurationId":{
-         "type":"string",
-         "defaultValue":"",
-         "metadata":{
-            "description":"Maintenance window ID. Please note that during a maintenance event, databases are fully available and accessible but some of the maintenance updates require a failover as Azure takes databases offline for a short time to apply the maintenance updates. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/database/maintenance-window"
+      "maintenanceConfigurationId": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Maintenance window ID. Please note that during a maintenance event, databases are fully available and accessible but some of the maintenance updates require a failover as Azure takes databases offline for a short time to apply the maintenance updates. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/database/maintenance-window"
          }
       },
-      "timezoneId":{
-         "type":"string",
-         "defaultValue":"Eastern Standard Time",
-         "metadata":{
-            "description":"sets id of the timezone. Allowed values are timezones supported by Windows. Windows keeps details on supported timezones, List of Ids can also be obtained by executing [System.TimeZoneInfo]::GetSystemTimeZones() in PowerShell. An example of valid timezone id is 'Pacific Standard Time' or 'W. Europe Standard Time"
+      "timezoneId": {
+         "type": "string",
+         "defaultValue": "Eastern Standard Time",
+         "metadata": {
+            "description": "sets id of the timezone. Allowed values are timezones supported by Windows. Windows keeps details on supported timezones, List of Ids can also be obtained by executing [System.TimeZoneInfo]::GetSystemTimeZones() in PowerShell. An example of valid timezone id is 'Pacific Standard Time' or 'W. Europe Standard Time"
          }
       },
-      "tags":{
-         "type":"object",
-         "defaultValue":{
-            
+      "tags": {
+         "type": "object",
+         "defaultValue": {
+
          },
-         "metadata":{
-            "description":"Tags for the Managed Instance SQL resource."
+         "metadata": {
+            "description": "Tags for the Managed Instance SQL resource."
          }
       },
-      "vnet_template":{
-         "type":"object",
-         "metadata":{
-            "description":"The location of resources, such as templates and vnet modules, that the template depends on"
+      "_artifactsLocation": {
+         "type": "string",
+         "metadata": {
+            "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+         },
+         "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/azure-sql-managed-instance/"
+      },
+      "_artifactsLocationSasToken": {
+         "type": "securestring",
+         "metadata": {
+            "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+         },
+         "defaultValue": ""
+      },
+      "vnetAddressRange": {
+         "type": "string",
+         "defaultValue": "10.0.0.0/16",
+         "metadata": {
+            "description": "Address range for the virtual network in CIDR notation"
          }
       },
-      "vnetAddressRange":{
-         "type":"string",
-         "defaultValue":"10.0.0.0/16",
-         "metadata":{
-            "description":"Address range for the virtual network in CIDR notation"
+      "managedInstanceNSGName": {
+         "type": "string",
+         "defaultValue": "mi-NSG",
+         "metadata": {
+            "description": "Name of the Managed Instance NSG"
          }
       },
-      "managedInstanceNSGName":{
-         "type":"string",
-         "defaultValue":"mi-NSG",
-         "metadata":{
-            "description":"Name of the Managed Instance NSG"
+      "managedInstanceRouteTableName": {
+         "type": "string",
+         "defaultValue": "mi-RouteTable",
+         "metadata": {
+            "description": "Name of the Managed Instance Route Table"
          }
       },
-      "managedInstanceRouteTableName":{
-         "type":"string",
-         "defaultValue":"mi-RouteTable",
-         "metadata":{
-            "description":"Name of the Managed Instance Route Table"
+      "managedInstanceSubnetAddressRange": {
+         "type": "string",
+         "defaultValue": "10.0.0.0/24",
+         "metadata": {
+            "description": "Managed Instance Subnet range"
          }
       },
-      "managedInstanceSubnetAddressRange":{
-         "type":"string",
-         "defaultValue":"10.0.0.0/24",
-         "metadata":{
-            "description":"Managed Instance Subnet range"
-         }
-      },
-      "miManagementIps":{
-         "type":"array",
-         "defaultValue":[
+      "miManagementIps": {
+         "type": "array",
+         "defaultValue": [
             "vnetLocalRoute",
             "13.64.0.0/11",
             "13.104.0.0/14",
@@ -409,104 +420,192 @@
             "199.30.16.0/20",
             "204.79.180.0/24"
          ],
-         "metadata":{
-            "description":"List of MI management IP ranges"
+         "metadata": {
+            "description": "List of MI management IP ranges"
+         }
+      },
+      "vnetPeeringName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Name of the vnet peer"
+         }
+      },
+      "remoteVirtualNetwork_external_id": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "The full Azure resource ID of the remote virtual network. example.   /subscriptions/f77593b8-c144-4ed2-9038-fa8d1dabc54a/resourceGroups/app-expressroute-prod-useast2/providers/Microsoft.Network/virtualNetworks/app-expressroute-prod-useast2-vnet"
+         }
+      },
+      "allowVirtualNetworkAccess": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Controls if the VMs in the remote virtual network can access VMs in the local virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "allowForwardedTraffic": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Whether the forwarded traffic from the VMs in the local virtual network will be allowed/disallowed in remote virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "allowGatewayTransit": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Controls gatewayLinks can be used in the remote virtual network’s link to the local virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "useRemoteGateways": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "If remote gateways can be used on this virtual network. If the flag is set to true, and allowGatewayTransit on remote peering is also true, virtual network will use gateways of remote virtual network for transit. Only one peering can have this flag set to true. This flag cannot be set if virtual network already has a gateway."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "remoteAddressSpace": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Address prefix for virtual network peer, example: 10.239.0.0/24"
          }
       }
    },
-   "variables":{
-      
+   "variables": {
+      "nestedtemplateUri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet.json', parameters('_artifactsLocationSasToken')))]"
    },
-   "resources":[
+   "resources": [
       {
-         "type":"Microsoft.Resources/deployments",
-         "apiVersion":"2019-10-01",
-         "name":"BuildMINetworking",
-         "properties":{
-            "mode":"Incremental",
-            "templateLink":{
-               "relativePath":"[parameters('vnet_template')]"
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2019-10-01",
+         "name": "BuildMINetworking",
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[variables('nestedtemplateUri')]",
+               "contentVersion": "1.0.0.0"
             },
-            "parameters":{
-               "location":{
-                  "value":"[parameters('location')]"
+            "parameters": {
+               "location": {
+                  "value": "[parameters('location')]"
                },
-               "vnet_template":{
-                  "value":"[parameters('vnet_template')]"
+               "vnetResourceName": {
+                  "value": "[parameters('vnetResourceName')]"
                },
-               "vnetResourceName":{
-                  "value":"[parameters('vnetResourceName')]"
+               "vnetAddressRange": {
+                  "value": "[parameters('vnetAddressRange')]"
                },
-               "vnetAddressRange":{
-                  "value":"[parameters('vnetAddressRange')]"
+               "managedInstanceSubnetName": {
+                  "value": "[parameters('managedInstanceSubnetName')]"
                },
-               "managedInstanceSubnetName":{
-                  "value":"[parameters('managedInstanceSubnetName')]"
+               "managedInstanceSubnetAddressRange": {
+                  "value": "[parameters('managedInstanceSubnetAddressRange')]"
                },
-               "managedInstanceSubnetAddressRange":{
-                  "value":"[parameters('managedInstanceSubnetAddressRange')]"
+               "managedInstanceNSGName": {
+                  "value": "[parameters('managedInstanceNSGName')]"
                },
-               "managedInstanceNSGName":{
-                  "value":"[parameters('managedInstanceNSGName')]"
+               "managedInstanceRouteTableName": {
+                  "value": "[parameters('managedInstanceRouteTableName')]"
                },
-               "managedInstanceRouteTableName":{
-                  "value":"[parameters('managedInstanceRouteTableName')]"
+               "miManagementIps": {
+                  "value": "[parameters('miManagementIps')]"
                },
-               "miManagementIps":{
-                  "value":"[parameters('miManagementIps')]"
+               "vnetPeeringName": {
+                  "value": "[parameters('vnetPeeringName')]"
+               },
+               "remoteVirtualNetwork_external_id": {
+                  "value": "[parameters('remoteVirtualNetwork_external_id')]"
+               },
+               "allowVirtualNetworkAccess": {
+                  "value": "[parameters('allowVirtualNetworkAccess')]"
+               },
+               "allowForwardedTraffic": {
+                  "value": "[parameters('allowForwardedTraffic')]"
+               },
+               "allowGatewayTransit": {
+                  "value": "[parameters('allowGatewayTransit')]"
+               },
+               "useRemoteGateways": {
+                  "value": "[parameters('useRemoteGateways')]"
+               },
+               "remoteAddressSpace": {
+                  "value": "[parameters('remoteAddressSpace')]"
                }
             }
          }
       },
       {
-         "type":"Microsoft.Sql/managedInstances",
-         "apiVersion":"2019-06-01-preview",
-         "name":"[parameters('sqlManagedInstanceName')]",
-         "location":"[parameters('location')]",
-         "sku":{
-            "name":"[parameters('sqlManagedInstanceSkuName')]",
-            "tier":"[parameters('sqlManagedInstanceskuEdition')]"
+         "type": "Microsoft.Sql/managedInstances",
+         "apiVersion": "2019-06-01-preview",
+         "name": "[parameters('sqlManagedInstanceName')]",
+         "location": "[parameters('location')]",
+         "sku": {
+            "name": "[parameters('sqlManagedInstanceSkuName')]",
+            "tier": "[parameters('sqlManagedInstanceskuEdition')]"
          },
-         "identity":{
-            "type":"SystemAssigned"
+         "identity": {
+            "type": "SystemAssigned"
          },
-         "tags":"[parameters('tags')]",
-         "dependsOn":[
+         "tags": "[parameters('tags')]",
+         "dependsOn": [
             "Microsoft.Resources/deployments/BuildMINetworking"
          ],
-         "properties":{
-            "administratorLogin":"[parameters('sqlManagedInstanceAdminLogin')]",
-            "administratorLoginPassword":"[parameters('sqlManagedInstancePassword')]",
-            "subnetId":"[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnetResourceName'),parameters('managedInstanceSubnetName'))]",
-            "storageSizeInGB":"[parameters('sqlManagedInstanceStorageSizeInGB')]",
-            "vCores":"[parameters('sqlManagedInstancevCores')]",
-            "licenseType":"[parameters('sqlManagedInstancelicenseType')]",
-            "hardwareFamily":"[parameters('sqlManagedInstanceHardwareFamily')]",
-            "collation":"[parameters('sqlManagedInstanceCollation')]",
-            "proxyOverride":"[parameters('proxyOverride')]",
-            "publicDataEndpointEnabled":"[parameters('publicDataEndpointEnabled')]",
-            "minimalTlsVersion":"[parameters('minimalTlsVersion')]",
-            "backupShortTermRetentionPolicies":"[parameters('backupShortTermRetentionPolicies')]",
-            "azureAdAdmin":"[parameters('azureAdAdmin')]",
-            "maintenanceConfigurationId":"[parameters('maintenanceConfigurationId')]",
-            "storageAccountType":"[parameters('storageAccountType')]",
-            "zoneRedundant":"[parameters('zoneRedundant')]",
-            "timezoneId":"[parameters('timezoneId')]"
+         "properties": {
+            "administratorLogin": "[parameters('sqlManagedInstanceAdminLogin')]",
+            "administratorLoginPassword": "[parameters('sqlManagedInstancePassword')]",
+            "subnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnetResourceName'),parameters('managedInstanceSubnetName'))]",
+            "storageSizeInGB": "[parameters('sqlManagedInstanceStorageSizeInGB')]",
+            "vCores": "[parameters('sqlManagedInstancevCores')]",
+            "licenseType": "[parameters('sqlManagedInstancelicenseType')]",
+            "hardwareFamily": "[parameters('sqlManagedInstanceHardwareFamily')]",
+            "collation": "[parameters('sqlManagedInstanceCollation')]",
+            "proxyOverride": "[parameters('proxyOverride')]",
+            "publicDataEndpointEnabled": "[parameters('publicDataEndpointEnabled')]",
+            "minimalTlsVersion": "[parameters('minimalTlsVersion')]",
+            "backupShortTermRetentionPolicies": "[parameters('backupShortTermRetentionPolicies')]",
+            "azureAdAdmin": "[parameters('azureAdAdmin')]",
+            "maintenanceConfigurationId": "[parameters('maintenanceConfigurationId')]",
+            "storageAccountType": "[parameters('storageAccountType')]",
+            "zoneRedundant": "[parameters('zoneRedundant')]",
+            "timezoneId": "[parameters('timezoneId')]"
          }
       },
       {
-         "type":"Microsoft.Sql/managedInstances/administrators",
-         "apiVersion":"2019-06-01-preview",
-         "name":"[concat(parameters('sqlManagedInstanceName'), '/ActiveDirectory')]",
-         "condition":"[not(empty(parameters('azureAdAdmin')))]",
-         "dependsOn":[
+         "type": "Microsoft.Sql/managedInstances/administrators",
+         "apiVersion": "2019-06-01-preview",
+         "name": "[concat(parameters('sqlManagedInstanceName'), '/ActiveDirectory')]",
+         "condition": "[not(empty(parameters('azureAdAdmin')))]",
+         "dependsOn": [
             "[resourceId('Microsoft.Sql/managedInstances', parameters('sqlManagedInstanceName'))]"
          ],
-         "properties":{
-            "administratorType":"ActiveDirectory",
-            "login":"[parameters('azureAdAdmin').login]",
-            "sid":"[parameters('azureAdAdmin').sid]",
-            "tenantId":"[parameters('azureAdAdmin').tenantId]"
+         "properties": {
+            "administratorType": "ActiveDirectory",
+            "login": "[parameters('azureAdAdmin').login]",
+            "sid": "[parameters('azureAdAdmin').sid]",
+            "tenantId": "[parameters('azureAdAdmin').tenantId]"
          }
       }
    ]
