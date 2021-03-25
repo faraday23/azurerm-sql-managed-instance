@@ -50,6 +50,18 @@
             "description": "List of MI management IP ranges"
          }
       },
+      "deployVnetPeering": {
+         "type": "string",
+         "defaultValue": "false",
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ],
+         "metadata": {
+            "description": "Name of the vnet peer"
+         }
+      },
       "vnetPeeringName": {
          "type": "string",
          "metadata": {
@@ -112,6 +124,9 @@
             "description": "Address prefix for virtual network peer, example: 10.239.0.0/24"
          }
       }
+   },
+   "variables": {
+      "remoteVirtualNetwork_external_id": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('vnetPeeringName'))]"
    },
    "resources": [
       {
@@ -265,14 +280,18 @@
                         }
                      ]
                   }
-               }
-            ],
-            "virtualNetworkPeerings": [
+               },
                {
-                  "name": "[parameters('vnetPeeringName')]",
+                  "condition": "[equals(parameters('deployVnetPeering'), 'true')]",
+                  "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                  "apiVersion": "2020-08-01",
+                  "name": "[concat(parameters('vnetResourceName'), '/', parameters('vnetPeeringName'))]",
+                  "dependsOn": [
+                     "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetResourceName'))]"
+                  ],
                   "properties": {
                      "remoteVirtualNetwork": {
-                        "id": "[parameters('remoteVirtualNetwork_external_id')]"
+                        "id": "[variables('remoteVirtualNetwork_external_id')]"
                      },
                      "allowVirtualNetworkAccess": "[parameters('allowVirtualNetworkAccess')]",
                      "allowForwardedTraffic": "[parameters('allowForwardedTraffic')]",
@@ -285,27 +304,7 @@
                      }
                   }
                }
-            ],
-            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-            "apiVersion": "2020-08-01",
-            "name": "[concat(parameters('vnetResourceName'), '/', parameters('vnetPeeringName'))]",
-            "dependsOn": [
-               "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetResourceName'))]"
-            ],
-            "properties": {
-               "remoteVirtualNetwork": {
-                  "id": "[parameters('remoteVirtualNetwork_external_id')]"
-               },
-               "allowVirtualNetworkAccess": "[parameters('allowVirtualNetworkAccess')]",
-               "allowForwardedTraffic": "[parameters('allowForwardedTraffic')]",
-               "allowGatewayTransit": "[parameters('allowGatewayTransit')]",
-               "useRemoteGateways": "[parameters('useRemoteGateways')]",
-               "remoteAddressSpace": {
-                  "addressPrefixes": [
-                     "[parameters('remoteAddressSpace')]"
-                  ]
-               }
-            }
+            ]
          }
       }
    ]
