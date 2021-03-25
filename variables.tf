@@ -17,7 +17,7 @@ variable "location" {
 variable "deployment_mode" {
   description = "(Required) The Deployment Mode for this Resource Group Template Deployment. Possible values are Complete (where resources in the Resource Group not specified in the ARM Template will be destroyed) and Incremental (where resources are additive only)."
   type        = string
-  default     = "Complete"
+  default     = "Incremental"
 }
 
 variable "sql_mi_settings" {
@@ -39,6 +39,15 @@ variable "sql_mi_defaults" {
     sqlManagedInstanceCollation       = "SQL_Latin1_General_CP1_CI_AS"
     sqlManagedInstanceAdminLogin      = "azadmin"
     sqlManagedInstancePassword        = ""
+    backupShortTermRetentionPolicies  = "7"
+    azureAdAdmin                      = ""
+    storageAccountType                = "GRS"
+    zoneRedundant                     = "false"
+    timezoneId                        = "EST"
+    publicDataEndpointEnabled         = "false"
+    proxyOverride                     = "Proxy"
+    minimalTlsVersion                 = "1.2"
+    maintenanceConfigurationId        = ""
     tags                              = {}
     "_artifactsLocation"              = "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/azure-sql-managed-instance/"
     "_artifactsLocationSasToken"      = ""
@@ -52,22 +61,23 @@ variable "sql_mi_defaults" {
   }
   description = <<EOT
 azure sql managed instance settings (only applied to virtual machine settings managed within this module)
-    managedInstanceName                = (Required) The name of the Managed Instance.
+    sqlManagedInstanceName             = (Required) The name of the Managed Instance.
     location                           = (Required) The location of the Managed Instance
-    skuName                            = (Required) Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated. allowedValues: GP_Gen4, GP_Gen5, BC_Gen4, BC_Gen5"
-    skuEdition                         = (Optional) SKU Edition for the Managed Instance. In case skuName is set this parameter is ignored.
-    storageSizeInGB                    = (Required) Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. minimumValue: 32.
-    vCores                             = (Required) The number of vCores. allowedValues: 4, 8, 16, 24, 32, 40, 64, 80
-    dnsZonePartner                     = (Optional) The resource id of another Managed Instance whose DNS zone this Managed Instance will share after creation.
-    licenseType                        = (Optional) Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses.
-    collation                          = (Optional) Specifies the priority of this Virtual Machine. Possible values are Regular and Spot. Defaults to Regular. Changing this forces a new resource to be created.
-    timezoneId                         = (Optional) Specifies what should happen when the Virtual Machine is evicted for price reasons when using a Spot instance. At this time the only supported value is Deallocate. Changing this forces a new resource to be created. This can only be configured when priority is set to Spot.
+    sqlManagedInstanceSkuName          = (Required) Managed instance SKU. If SKU is not set, skuEdition and hardwareFamily values have to be populated. allowedValues: GP_Gen4, GP_Gen5, BC_Gen4, BC_Gen5"
+    sqlManagedInstanceStorageSizeInGB  = (Required) Determines how much Storage size in GB to associate with instance. Increments of 32 GB allowed only. minimumValue: 32.
+    sqlManagedInstancevCores           = (Required) The number of vCores. allowedValues: 4, 8, 16, 24, 32, 40, 64, 80
+    sqlManagedInstanceLicenseType      = (Optional) Determines license pricing model. Select 'LicenseIncluded' for a regular price inclusive of a new SQL license. Select 'Base Price' for a discounted AHB price for bringing your own SQL licenses.
+    sqlManagedInstanceHardwareFamily   = (Optional) Compute generation for the instance. Gen4, Gen5
+    sqlManagedInstanceCollation        = (Optional) Collation of the Managed Instance.
+    timezoneId                         = (Optional) Id of the timezone. Allowed values are timezones supported by Windows.
     proxyOverride                      = (Optional) Determines connection type for private endpoint. Proxy connection type enables proxy connectivity to Managed Instance. Redirect mode enables direct connectivity to the instance resulting in improved latency and throughput. allowedValues: Proxy, Redirect.
     publicDataEndpointEnabled          = (Optional) Determines whether public data endpoint will be enabled, required for clients outside of the connected virtual networks. Public endpoint will always default to Proxy connection mode.
     nsgForPublicEndpoint               = (Optional) Determines whether which NSG inbound traffic rule to add for the public endpoint. In case publicDataEndpointEnabled is false this parameter is ignored. allowedValues: "", allowFromInternetTo3342NSG, allowFromAzureCloudTo3342NSG, disallowTrafficTo3342NSG.
     minimalTlsVersion                  = (Required) The minimum TLS version enforced by the Managed Instance for inbound connections. allowedValues: 1.0, 1.1, 1.2"
-    administratorLogin                 = (Required) The login of the Managed Instance admin.
-    administratorLoginPassword         = (Required) The password of the Managed Instance admin.
+    sqlManagedInstanceAdminLogin       = (Required) The login of the Managed Instance admin.
+    sqlManagedInstancePassword         = (Required) The password of the Managed Instance admin.
+    backupShortTermRetentionPolicies   = (Optional) SQL managed instances are backed up automatically. Backup availability is listed below for each database on this managed instance. Manage your available long-term retention (LTR) backups here. available values: retentionDays: 7-35
+    maintenanceConfigurationId         = (Optional) Maintenance window ID. Please note that during a maintenance event, databases are fully available and accessible but some of the maintenance updates require a failover as Azure takes databases offline for a short time to apply the maintenance updates. for more info see https://docs.microsoft.com/en-us/azure/azure-sql/database/maintenance-window"
     managedInstanceTags                = (Optional) Resource tags to associate with the instance. example: { "<tag-name1>": "<tag-value1>", "<tag-name2>": "<tag-value2>" },
     storageAccountType                 = (Required) Option for configuring backup storage redundancy. Selecting 'GRS' will enable 'RA-GRS'. allowedValues: GRS, ZRS, LRS"
     virtualNetworkName                 = (Required) The virtual network name. Leave empty for the default value.
@@ -76,7 +86,6 @@ azure sql managed instance settings (only applied to virtual machine settings ma
     defaultSubnetAddressPrefix         = (Optional) The default subnet address is "10.0.0.0/24"
     deployInExistingSubnet             = (Optional) Determines whether the Managed Instance will be deployed in an existing subnet. Subnet parameters need to be valid if this is set.
     subnetName                         = (Optional) The subnet name. Leave empty for the default value. defaultValue: "ManagedInstance"
-
 EOT 
 }
 
