@@ -87,9 +87,6 @@ resource "azurerm_resource_group_template_deployment" "sql_mi" {
    "tags":{
       "value":${jsonencode(var.sql_mi_settings.tags)}
    },
-   "vnet_template":{
-      "value":"${data.local_file.arm_template_vnet.content}"
-   },
    "vnetResourceName":{
       "value":"${try(var.sql_mi_settings.vnetResourceName, var.sql_mi_defaults.vnetResourceName)}"
    },
@@ -110,7 +107,7 @@ resource "azurerm_resource_group_template_deployment" "sql_mi" {
    },
    "miManagementIps":{
       "value":${jsonencode(var.sql_mi_settings.miManagementIps)}
-   }
+   },
    "vnetPeeringName":{
       "value":"${try(var.sql_mi_settings.vnetPeeringName, var.sql_mi_defaults.vnetPeeringName)}"
    },
@@ -131,7 +128,7 @@ resource "azurerm_resource_group_template_deployment" "sql_mi" {
    },
    "remoteAddressSpace":{
       "value":"${try(var.sql_mi_settings.remoteAddressSpace, var.sql_mi_defaults.remoteAddressSpace)}"
-   },
+   }
 }
    PARAMETERS
 }
