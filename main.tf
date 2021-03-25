@@ -2,13 +2,6 @@
 // Issue as tracked at https://github.com/terraform-providers/terraform-provider-azurerm/issues/1747
 // As workaround we can use ARM template deployment from Terraform
 
-# creates random password for admin account 
-resource "random_password" "admin" {
-  length           = 24
-  special          = true
-  override_special = "!@#$%^&*"
-}
-
 resource "random_string" "mi_name" {
   length  = 4
   special = false
@@ -16,15 +9,19 @@ resource "random_string" "mi_name" {
   number  = false
 }
 
-data "local_file" "arm_template" {
+data "local_file" "arm_template_sql" {
   filename = "${path.module}/sql-managed-instance.json"
+}
+
+data "local_file" "arm_template_vnet" {
+  filename = "${path.module}/nestedtemplates/vnet.json"
 }
 
 resource "azurerm_resource_group_template_deployment" "sql_mi" {
   name                = "${var.names.environment}-${var.names.location}-${random_string.mi_name.result}"
   resource_group_name = var.resource_group_name
   deployment_mode     = var.deployment_mode
-  template_content    = data.local_file.arm_template.content
+  template_content    = data.local_file.arm_template_sql.content
   parameters_content  = <<PARAMETERS
 {
    "sqlManagedInstanceName":{
@@ -60,14 +57,35 @@ resource "azurerm_resource_group_template_deployment" "sql_mi" {
    "sqlManagedInstancePassword":{
       "value":"${try(var.sql_mi_settings.sqlManagedInstancePassword, var.sql_mi_defaults.sqlManagedInstancePassword)}"
    },
+   "backupShortTermRetentionPolicies":{
+      "value":"${try(var.sql_mi_settings.backupShortTermRetentionPolicies, var.sql_mi_defaults.backupShortTermRetentionPolicies)}"
+   },
+   "azureAdAdmin":{
+      "value":"${try(var.sql_mi_settings.azureAdAdmin, var.sql_mi_defaults.azureAdAdmin)}"
+   },
+   "storageAccountType":{
+      "value":"${try(var.sql_mi_settings.storageAccountType, var.sql_mi_defaults.storageAccountType)}"
+   },
+   "zoneRedundant":{
+      "value":"${try(var.sql_mi_settings.zoneRedundant, var.sql_mi_defaults.zoneRedundant)}"
+   },
+   "timezoneId":{
+      "value":"${try(var.sql_mi_settings.timezoneId, var.sql_mi_defaults.timezoneId)}"
+   },
+   "publicDataEndpointEnabled":{
+      "value":"${try(var.sql_mi_settings.publicDataEndpointEnabled, var.sql_mi_defaults.publicDataEndpointEnabled)}"
+   },
+   "proxyOverride":{
+      "value":"${try(var.sql_mi_settings.proxyOverride, var.sql_mi_defaults.proxyOverride)}"
+   },
+   "minimalTlsVersion":{
+      "value":"${try(var.sql_mi_settings.minimalTlsVersion, var.sql_mi_defaults.minimalTlsVersion)}"
+   }, 
+   "maintenanceConfigurationId":{
+      "value":"${try(var.sql_mi_settings.maintenanceConfigurationId, var.sql_mi_defaults.maintenanceConfigurationId)}"
+   }, 
    "tags":{
       "value":${jsonencode(var.sql_mi_settings.tags)}
-   },
-   "_artifactsLocation":{
-      "value":"${try(var.sql_mi_settings._artifactsLocation, var.sql_mi_defaults._artifactsLocation)}"
-   },
-   "_artifactsLocationSasToken":{
-      "value":"${try(var.sql_mi_settings._artifactsLocationSasToken, var.sql_mi_defaults._artifactsLocationSasToken)}"
    },
    "vnetResourceName":{
       "value":"${try(var.sql_mi_settings.vnetResourceName, var.sql_mi_defaults.vnetResourceName)}"
@@ -89,9 +107,28 @@ resource "azurerm_resource_group_template_deployment" "sql_mi" {
    },
    "miManagementIps":{
       "value":${jsonencode(var.sql_mi_settings.miManagementIps)}
+   },
+   "vnetPeeringName":{
+      "value":"${try(var.sql_mi_settings.vnetPeeringName, var.sql_mi_defaults.vnetPeeringName)}"
+   },
+   "remoteVirtualNetwork_external_id":{
+      "value":"${try(var.sql_mi_settings.remoteVirtualNetwork_external_id, var.sql_mi_defaults.remoteVirtualNetwork_external_id)}"
+   },
+   "allowVirtualNetworkAccess":{
+      "value":"${try(var.sql_mi_settings.allowVirtualNetworkAccess, var.sql_mi_defaults.allowVirtualNetworkAccess)}"
+   },
+   "allowForwardedTraffic":{
+      "value":"${try(var.sql_mi_settings.allowForwardedTraffic, var.sql_mi_defaults.allowForwardedTraffic)}"
+   },
+   "allowGatewayTransit":{
+      "value":"${try(var.sql_mi_settings.allowGatewayTransit, var.sql_mi_defaults.allowGatewayTransit)}"
+   },
+   "useRemoteGateways":{
+      "value":"${try(var.sql_mi_settings.useRemoteGateways, var.sql_mi_defaults.useRemoteGateways)}"
+   },
+   "remoteAddressSpace":{
+      "value":"${try(var.sql_mi_settings.remoteAddressSpace, var.sql_mi_defaults.remoteAddressSpace)}"
    }
 }
    PARAMETERS
 }
-
-

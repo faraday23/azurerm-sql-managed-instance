@@ -1,0 +1,312 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "location": {
+         "type": "string",
+         "metadata": {
+            "description": "Location for all resources"
+         }
+      },
+      "vnetResourceName": {
+         "type": "string",
+         "metadata": {
+            "description": "The name of the vnet"
+         }
+      },
+      "vnetAddressRange": {
+         "type": "string",
+         "metadata": {
+            "description": "Address range of the virtual network"
+         }
+      },
+      "managedInstanceSubnetName": {
+         "type": "string",
+         "metadata": {
+            "description": "Managed Instance Subnet name"
+         }
+      },
+      "managedInstanceSubnetAddressRange": {
+         "type": "string",
+         "metadata": {
+            "description": "Managed Instance Subnet range"
+         }
+      },
+      "managedInstanceNSGName": {
+         "type": "string",
+         "metadata": {
+            "description": "Name of the Managed Instance NSG"
+         }
+      },
+      "managedInstanceRouteTableName": {
+         "type": "string",
+         "metadata": {
+            "description": "Name of the Managed Instance Route Table"
+         }
+      },
+      "miManagementIps": {
+         "type": "array",
+         "metadata": {
+            "description": "List of MI management IP ranges"
+         }
+      },
+      "vnetPeeringName": {
+         "type": "string",
+         "metadata": {
+            "description": "Name of the vnet peer"
+         }
+      },
+      "remoteVirtualNetwork_external_id": {
+         "type": "string",
+         "metadata": {
+            "description": "The full Azure resource ID of the remote virtual network. example.   /subscriptions/f77593b8-c144-4ed2-9038-fa8d1dabc54a/resourceGroups/app-expressroute-prod-useast2/providers/Microsoft.Network/virtualNetworks/app-expressroute-prod-useast2-vnet"
+         }
+      },
+      "allowVirtualNetworkAccess": {
+         "type": "string",
+         "metadata": {
+            "description": "Controls if the VMs in the remote virtual network can access VMs in the local virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "allowForwardedTraffic": {
+         "type": "string",
+         "metadata": {
+            "description": "Whether the forwarded traffic from the VMs in the local virtual network will be allowed/disallowed in remote virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "allowGatewayTransit": {
+         "type": "string",
+         "metadata": {
+            "description": "Controls gatewayLinks can be used in the remote virtual network’s link to the local virtual network."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "useRemoteGateways": {
+         "type": "string",
+         "metadata": {
+            "description": "If remote gateways can be used on this virtual network. If the flag is set to true, and allowGatewayTransit on remote peering is also true, virtual network will use gateways of remote virtual network for transit. Only one peering can have this flag set to true. This flag cannot be set if virtual network already has a gateway."
+         },
+         "allowedValues": [
+            "true",
+            "false",
+            ""
+         ]
+      },
+      "remoteAddressSpace": {
+         "type": "string",
+         "metadata": {
+            "description": "Address prefix for virtual network peer, example: 10.239.0.0/24"
+         }
+      }
+   },
+   "resources": [
+      {
+         "type": "Microsoft.Network/networkSecurityGroups",
+         "apiVersion": "2019-11-01",
+         "location": "[parameters('location')]",
+         "name": "[parameters('managedInstanceNsgName')]",
+         "properties": {
+            "securityRules": [
+               {
+                  "name": "allow-management-outbound",
+                  "properties": {
+                     "description": "Allow outbound management TCP traffic",
+                     "protocol": "Tcp",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "*",
+                     "destinationAddressPrefix": "AzureCloud",
+                     "access": "Allow",
+                     "priority": 110,
+                     "direction": "Outbound",
+                     "destinationPortRanges": [
+                        "443",
+                        "12000"
+                     ]
+                  }
+               },
+               {
+                  "name": "inbound-management",
+                  "properties": {
+                     "description": "Management ports for the Managed Instance",
+                     "protocol": "TCP",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "SqlManagement",
+                     "destinationAddressPrefix": "[parameters('managedInstanceSubnetAddressRange')]",
+                     "access": "Allow",
+                     "priority": 100,
+                     "direction": "Inbound",
+                     "sourcePortRanges": [
+
+                     ],
+                     "destinationPortRanges": [
+                        "9000",
+                        "9003",
+                        "1438",
+                        "1440",
+                        "1452"
+                     ]
+                  }
+               },
+               {
+                  "name": "outbound-mi-subnet",
+                  "properties": {
+                     "protocol": "*",
+                     "sourcePortRange": "*",
+                     "destinationPortRange": "*",
+                     "sourceAddressPrefix": "*",
+                     "destinationAddressPrefix": "[parameters('managedInstanceSubnetAddressRange')]",
+                     "access": "Allow",
+                     "priority": 150,
+                     "direction": "Outbound"
+                  }
+               },
+               {
+                  "name": "inbound-mi-subnet",
+                  "properties": {
+                     "protocol": "*",
+                     "sourcePortRange": "*",
+                     "destinationPortRange": "*",
+                     "sourceAddressPrefix": "[parameters('managedInstanceSubnetAddressRange')]",
+                     "destinationAddressPrefix": "*",
+                     "access": "Allow",
+                     "priority": 110,
+                     "direction": "Inbound"
+                  }
+               },
+               {
+                  "name": "inbound-health-probe",
+                  "properties": {
+                     "protocol": "*",
+                     "sourcePortRange": "*",
+                     "destinationPortRange": "*",
+                     "sourceAddressPrefix": "AzureLoadBalancer",
+                     "destinationAddressPrefix": "*",
+                     "access": "Allow",
+                     "priority": 140,
+                     "direction": "Inbound"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Network/routeTables",
+         "apiVersion": "2019-11-01",
+         "name": "[parameters('managedInstanceRouteTableName')]",
+         "location": "[parameters('location')]",
+         "tags": {
+            "displayName": "Deploy Azure SQL Managed Instance UDR"
+         },
+         "properties": {
+            "copy": [
+               {
+                  "name": "routes",
+                  "count": "[length(parameters('miManagementIps'))]",
+                  "input": {
+                     "name": "[if(equals(copyIndex('routes'),0),'subnet_to_vnetlocal',concat(replace(parameters('miManagementIps')[copyIndex('routes')],'/','-'),'-next-hop-internet-route'))]",
+                     "properties": {
+                        "addressPrefix": "[if(equals(copyIndex('routes'),0),parameters('managedInstanceSubnetAddressRange'),parameters('miManagementIps')[copyIndex('routes')])]",
+                        "nextHopType": "[if(equals(copyIndex('routes'),0),'VnetLocal','Internet')]"
+                     }
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Network/virtualNetworks",
+         "apiVersion": "2019-11-01",
+         "name": "[parameters('vnetResourceName')]",
+         "location": "[parameters('location')]",
+         "tags": {
+            "displayName": "Deploy VNet"
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('managedInstanceNSGName'))]",
+            "[resourceId('Microsoft.Network/routeTables',parameters('managedInstanceRouteTableName'))]"
+         ],
+         "properties": {
+            "addressSpace": {
+               "addressPrefixes": [
+                  "[parameters('vnetAddressRange')]"
+               ]
+            },
+            "subnets": [
+               {
+                  "name": "[parameters('managedInstanceSubnetName')]",
+                  "properties": {
+                     "addressPrefix": "[parameters('managedInstanceSubnetAddressRange')]",
+                     "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables',parameters('managedInstanceRouteTableName'))]"
+                     },
+                     "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('managedInstanceNSGName'))]"
+                     },
+                     "delegations": [
+                        {
+                           "properties": {
+                              "serviceName": "Microsoft.Sql/managedInstances"
+                           },
+                           "name": "[concat(parameters('managedInstanceSubnetName'),'-delegation')]"
+                        }
+                     ]
+                  }
+               }
+            ],
+            "virtualNetworkPeerings": [
+               {
+                  "name": "[parameters('vnetPeeringName')]",
+                  "properties": {
+                     "remoteVirtualNetwork": {
+                        "id": "[parameters('remoteVirtualNetwork_external_id')]"
+                     },
+                     "allowVirtualNetworkAccess": "[parameters('allowVirtualNetworkAccess')]",
+                     "allowForwardedTraffic": "[parameters('allowForwardedTraffic')]",
+                     "allowGatewayTransit": "[parameters('allowGatewayTransit')]",
+                     "useRemoteGateways": "[parameters('useRemoteGateways')]",
+                     "remoteAddressSpace": {
+                        "addressPrefixes": [
+                           "[parameters('remoteAddressSpace')]"
+                        ]
+                     }
+                  }
+               }
+            ],
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "apiVersion": "2020-08-01",
+            "name": "[concat(parameters('vnetResourceName'), '/', parameters('vnetPeeringName'))]",
+            "dependsOn": [
+               "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetResourceName'))]"
+            ],
+            "properties": {
+               "remoteVirtualNetwork": {
+                  "id": "[parameters('remoteVirtualNetwork_external_id')]"
+               },
+               "allowVirtualNetworkAccess": "[parameters('allowVirtualNetworkAccess')]",
+               "allowForwardedTraffic": "[parameters('allowForwardedTraffic')]",
+               "allowGatewayTransit": "[parameters('allowGatewayTransit')]",
+               "useRemoteGateways": "[parameters('useRemoteGateways')]",
+               "remoteAddressSpace": {
+                  "addressPrefixes": [
+                     "[parameters('remoteAddressSpace')]"
+                  ]
+               }
+            }
+         }
+      }
+   ]
+}
