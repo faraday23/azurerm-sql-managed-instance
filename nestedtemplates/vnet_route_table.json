@@ -52,25 +52,18 @@
         },
         "azureFirewallRouteTableName": {
             "type": "string",
+            "defaultValue": "azureFirewallRouteTable",
             "metadata": {
                 "description": "Name of the Managed Instance Route Table"
             }
         },
-        "tags":{
-         "type":"object",
-         "defaultValue":{
-         },
-         "metadata":{
-            "description":"Tags for the vnet."
-         }
-      },
         "nextHopAddressFirewall1": {
             "type": "string",
             "metadata": {
                 "description": "Name of the nextHopIpAddress for firewall 1"
             }
         },
-         "nextHopAddressFirewall2": {
+        "nextHopAddressFirewall2": {
             "type": "string",
             "metadata": {
                 "description": "Name of the nextHopIpAddress for firewall 2"
@@ -86,6 +79,14 @@
             "type": "string",
             "metadata": {
                 "description": "Name of the nextHopIpAddress for firewall 4"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {
+            },
+            "metadata": {
+                "description": "Tags for the vnet."
             }
         }
     },
