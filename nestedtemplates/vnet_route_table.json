@@ -49,6 +49,44 @@
             "metadata": {
                 "description": "List of MI management IP ranges"
             }
+        },
+        "azureFirewallRouteTableName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Managed Instance Route Table"
+            }
+        },
+        "tags":{
+         "type":"object",
+         "defaultValue":{
+         },
+         "metadata":{
+            "description":"Tags for the vnet."
+         }
+      },
+        "nextHopAddressFirewall1": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the nextHopIpAddress for firewall 1"
+            }
+        },
+         "nextHopAddressFirewall2": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the nextHopIpAddress for firewall 2"
+            }
+        },
+        "nextHopAddressFirewall3": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the nextHopIpAddress for firewall 3"
+            }
+        },
+        "nextHopAddressFirewall4": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the nextHopIpAddress for firewall 4"
+            }
         }
     },
     "resources": [
@@ -164,6 +202,70 @@
             }
         },
         {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2019-11-01",
+            "name": "[parameters('azureFirewallRouteTableName')]",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "disableBgpRoutePropagation": true,
+                "routes": [
+                    {
+                        "name": "internet",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "Internet",
+                            "hasBgpOverride": false
+                        }
+                    },
+                    {
+                        "name": "to-firewall1",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/8",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('nextHopAddressFirewall1')]",
+                            "hasBgpOverride": false
+                        }
+                    },
+                    {
+                        "name": "to-firewall2",
+                        "properties": {
+                            "addressPrefix": "172.16.0.0/12",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('nextHopAddressFirewall2')]",
+                            "hasBgpOverride": false
+                        }
+                    },
+                    {
+                        "name": "to-firewall3",
+                        "properties": {
+                            "addressPrefix": "192.168.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('nextHopAddressFirewall3')]",
+                            "hasBgpOverride": false
+                        }
+                    },
+                    {
+                        "name": "to-firewall4",
+                        "properties": {
+                            "addressPrefix": "138.12.8.0/21",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('nextHopAddressFirewall4')]",
+                            "hasBgpOverride": false
+                        }
+                    },
+                    {
+                        "name": "local-vnet",
+                        "properties": {
+                            "addressPrefix": "10.0.0.128/26",
+                            "nextHopType": "VnetLocal",
+                            "hasBgpOverride": false
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
             "name": "[parameters('vnetResourceName')]",
@@ -173,7 +275,8 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('managedInstanceNSGName'))]",
-                "[resourceId('Microsoft.Network/routeTables',parameters('managedInstanceRouteTableName'))]"
+                "[resourceId('Microsoft.Network/routeTables',parameters('managedInstanceRouteTableName'))]",
+                "[resourceId('Microsoft.Network/routeTables',parameters('azureFirewallRouteTableName'))]"
             ],
             "properties": {
                 "addressSpace": {
@@ -195,7 +298,7 @@
                             "delegations": [
                                 {
                                     "properties": {
-                                    "serviceName": "Microsoft.Sql/managedInstances"
+                                        "serviceName": "Microsoft.Sql/managedInstances"
                                     },
                                     "name": "[concat(parameters('managedInstanceSubnetName'),'-delegation')]"
                                 }
