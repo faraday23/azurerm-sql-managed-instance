@@ -88,4 +88,3 @@ azure sql managed instance settings (only applied to virtual machine settings ma
     subnetName                         = (Optional) The subnet name. Leave empty for the default value. defaultValue: "ManagedInstance"
 EOT 
 }
-
