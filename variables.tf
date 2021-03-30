@@ -47,7 +47,6 @@ variable "sql_mi_defaults" {
     publicDataEndpointEnabled         = "false"
     proxyOverride                     = "Proxy"
     minimalTlsVersion                 = "1.2"
-    maintenanceConfigurationId        = ""
     tags                              = {}
     "_artifactsLocation"              = "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/azure-sql-managed-instance/"
     "_artifactsLocationSasToken"      = ""
@@ -87,5 +86,5 @@ azure sql managed instance settings (only applied to virtual machine settings ma
     deployInExistingSubnet             = (Optional) Determines whether the Managed Instance will be deployed in an existing subnet. Subnet parameters need to be valid if this is set.
     subnetName                         = (Optional) The subnet name. Leave empty for the default value. defaultValue: "ManagedInstance"
 EOT 
-}
 
+}
